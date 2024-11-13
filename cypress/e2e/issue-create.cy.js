@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-const description = faker.word.words(10);
-const title = faker.word.noun();
+const description = faker.lorem.paragraph(2);
+const title = faker.lorem.word();
 
 describe('Issue create', () => {
   beforeEach(() => {
@@ -114,9 +114,7 @@ describe('Issue create', () => {
         .wait(1000)
         .trigger('mouseover')
         .trigger('click');
-      cy.get('[data-testid="icon:bug"]').should('be.visible', {
-        timeout: 5000,
-      });
+      cy.get('[data-testid="icon:bug"]').should('be.visible');
 
       //Will add reporter
       cy.get('[data-testid="select:reporterId"]').click();
@@ -179,9 +177,7 @@ describe('Issue create', () => {
         .wait(1000)
         .trigger('mouseover')
         .trigger('click');
-      cy.get('[data-testid="icon:task"]').should('be.visible', {
-        timeout: 5000,
-      });
+      cy.get('[data-testid="icon:task"]').should('be.visible');
 
       //Will add reporter
       cy.get('[data-testid="select:reporterId"]').click();

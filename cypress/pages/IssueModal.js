@@ -1,22 +1,85 @@
 class IssueModal {
   constructor() {
+    //create Issue modal
     this.submitButton = 'button[type="submit"]';
     this.issueModal = '[data-testid="modal:issue-create"]';
-    this.issueDetailModal = '[data-testid="modal:issue-details"]';
     this.title = 'input[name="title"]';
     this.issueType = '[data-testid="select:type"]';
     this.descriptionField = '.ql-editor';
     this.assignee = '[data-testid="select:userIds"]';
-    this.backlogList = '[data-testid="board-list:backlog"]';
-    this.issuesList = '[data-testid="list-issue"]';
+    //Issue Details modal
+    this.issueDetailModal = '[data-testid="modal:issue-details"]';
     this.deleteButton = '[data-testid="icon:trash"]';
     this.deleteButtonName = 'Delete issue';
-    this.cancelDeletionButtonName = 'Cancel';
     this.confirmationPopup = '[data-testid="modal:confirm"]';
+    this.cancelDeletionButtonName = 'Cancel';
     this.closeDetailModalButton = {
       locator: '[data-testid="icon:close"]',
       index: 0,
     };
+    //Issue details comments section
+    this.issueDetailComments = '[data-testid="issue-comment"]';
+    this.issueCommentArea = 'textarea[placeholder="Add a comment..."]';
+    this.saveCommentButtonName = 'Save';
+    this.editCommentButtonName = 'Edit';
+    this.deleteCommentButtonName = 'Delete';
+    this.cancelCommentEditButtonName = 'Cancel';
+    this.initialNumberOfComments;
+    //Main page
+    this.issuesList = '[data-testid="list-issue"]';
+    this.backlogList = '[data-testid="board-list:backlog"]';
+  }
+
+  addCommentToIssue(comment) {
+    this.getIssueDetailModal().within(() => {
+      cy.contains('Add a comment...').click();
+      cy.get(this.issueCommentArea).type(comment).should('contain', comment);
+      this.saveComment();
+      cy.log('Comment added');
+    });
+  }
+
+  editIssueComment(initialComment, editedComment) {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.issueDetailComments)
+        .contains(initialComment)
+        .siblings()
+        .contains(this.editCommentButtonName)
+        .click()
+        .should('not.exist');
+      cy.get(this.issueCommentArea).clear().type(editedComment);
+      this.saveComment();
+    });
+  }
+
+  deleteIssueComment(comment) {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.issueDetailComments)
+        .contains(comment)
+        .siblings()
+        .contains(this.deleteCommentButtonName)
+        .click();
+    });
+    this.confirmCommentDeletion();
+  }
+
+  verifyCommentVisibilityState(comment, isVisible = true) {
+    if (isVisible) {
+      cy.contains('Add a comment...').should('exist').and('be.visible');
+      cy.get(this.issueDetailComments).should('contain', comment);
+    }
+
+    if (!isVisible) {
+      cy.contains('Add a comment...').should('exist').and('be.visible');
+      cy.get(this.issueDetailComments).should('not.contain', comment);
+    }
+  }
+  saveComment() {
+    return cy
+      .contains('button', this.saveCommentButtonName)
+      .click()
+      .wait(1000)
+      .should('not.exist');
   }
 
   getIssueModal() {
@@ -29,9 +92,7 @@ class IssueModal {
 
   selectIssueType(issueType) {
     cy.get(this.issueType).click('bottomRight');
-    cy.get(`[data-testid="select-option:${issueType}"]`)
-      .trigger('mouseover')
-      .trigger('click');
+    cy.get(`[data-testid="select-option:${issueType}"]`).click();
   }
 
   selectAssignee(assigneeName) {
@@ -108,6 +169,15 @@ class IssueModal {
       });
     cy.get(this.confirmationPopup).should('not.exist');
     cy.get(this.backlogList).should('be.visible');
+  }
+
+  confirmCommentDeletion() {
+    cy.get(this.confirmationPopup)
+      .should('be.visible')
+      .within(() => {
+        cy.contains(this.deleteCommentButtonName).should('be.visible').click();
+      });
+    cy.get(this.confirmationPopup).should('not.exist');
   }
 
   cancelDeletion() {
