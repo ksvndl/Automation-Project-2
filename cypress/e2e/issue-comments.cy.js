@@ -70,7 +70,7 @@ describe('Issue comments creating, editing and deleting', () => {
       .should('not.exist');
   });
 
-  it.only(`Should add comment to issue`, () => {
+  it.only(`Should add comment to issue, edit it and then delete`, () => {
     const initialComment = faker.lorem.sentences(2);
     const editedComment = `EDITED ${initialComment}`;
     let isVisible;
