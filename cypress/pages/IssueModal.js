@@ -28,8 +28,262 @@ class IssueModal {
     //Main page
     this.issuesList = '[data-testid="list-issue"]';
     this.backlogList = '[data-testid="board-list:backlog"]';
+
+    //Time logging
+    this.timeLoggedIcon = '[data-testid="icon:stopwatch"]';
+    this.estimatedTimeInput = 'input[placeholder="Number"]';
+    this.timetrackingLabel = 'Time Tracking';
+    this.timeTrackingModal = '[data-testid="modal:tracking"]';
+    this.timeTrackingModalTimeSpentInput = {
+      locator: 'input[placeholder="Number"]',
+      index: 0,
+    };
+    this.timeTrackingModalTimeRemainingInput = {
+      locator: 'input[placeholder="Number"]',
+      index: 1,
+    };
+    this.timeTrackingModalDoneButtonLabel = 'Done';
   }
 
+  // getEstimatedTimeValue() {
+  //   cy.get(this.estimatedTimeInput)
+  //     .invoke('attr', 'value')
+  //     .then((value) => {
+  //       return value;
+  //     });
+  // }
+
+  getTimeTrackingModal() {
+    return cy.get(this.timeTrackingModal);
+  }
+
+  openTimeTrackingModal() {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon).should('exist').click();
+    });
+    this.getTimeTrackingModal().should('be.visible');
+    cy.log('Time tracking modal opened');
+  }
+
+  closeTimeTrackingModal() {
+    this.getTimeTrackingModal().within(() => {
+      cy.contains(this.timeTrackingModalDoneButtonLabel)
+        .should('be.visible')
+        .click();
+    });
+    this.getTimeTrackingModal().should('not.exist');
+    cy.log('Time tracking modal closed');
+  }
+
+  addTimeLogged(timeLogged) {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeTrackingModalTimeSpentInput.locator)
+        .eq(this.timeTrackingModalTimeSpentInput.index)
+        .should('be.visible')
+        .click()
+        .clear()
+        .type(timeLogged)
+        .should('have.value', timeLogged);
+    });
+    cy.log('Time spent added');
+  }
+  addTimeRemaining(timeRemaining) {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeTrackingModalTimeRemainingInput.locator)
+        .eq(this.timeTrackingModalTimeRemainingInput.index)
+        .should('be.visible')
+        .click()
+        .clear()
+        .type(timeRemaining)
+        .should('have.value', timeRemaining);
+    });
+    cy.log('Time remaining added');
+  }
+
+  editEstimatedHours(editedEstimatedHours) {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.estimatedTimeInput)
+        .scrollIntoView()
+        .should('be.visible')
+        .click()
+        .clear()
+        .type(editedEstimatedHours);
+      cy.get(this.estimatedTimeInput).should(
+        'have.value',
+        editedEstimatedHours
+      );
+      cy.contains(this.timetrackingLabel).click();
+      cy.log(`Estimated hours edited to ${editedEstimatedHours}`);
+    });
+  }
+
+  addEstimatedHours(estimatedHours) {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.estimatedTimeInput)
+        .should('be.visible')
+        .click()
+        .clear()
+        .type(estimatedHours);
+      cy.get(this.estimatedTimeInput).should('have.value', estimatedHours);
+      cy.contains(this.timetrackingLabel).click();
+      cy.log(`Estimated hours filled with ${estimatedHours}`);
+    });
+  }
+
+  verifyEstimatedHoursInIssueDetailModal(estimatedHours) {
+    cy.get(this.estimatedTimeInput).should('have.value', estimatedHours);
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .siblings()
+        .should('contain', `${estimatedHours}h estimated`);
+      cy.log('Estimated hours present in input field and in time logging');
+    });
+  }
+
+  verifyEstimatedHoursInTimeTrackingModal(estimatedHours) {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .siblings()
+        .should('contain', `${estimatedHours}h estimated`);
+      cy.log('Estimated hours present in input field and in time logging');
+    });
+  }
+
+  verifyNoTimeLoggedInIssueDetailModal() {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains('No time logged')
+        .should('exist')
+        .and('be.visible');
+      cy.log('No time logged and label present');
+    });
+  }
+
+  verifyNoTimeLoggedInTimeTrackingModal() {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains('No time logged')
+        .should('exist')
+        .and('be.visible');
+      cy.log('No time logged and label present');
+    });
+  }
+
+  verifyTimeLoggedInIssueDetailModal(timeLogged) {
+    return this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains(`${timeLogged}h logged`)
+        .should('exist')
+        .and('be.visible');
+      cy.log(`${timeLogged}h logged visible`);
+    });
+  }
+
+  verifyTimeLoggedInTimeTrackingModal(timeLogged) {
+    return this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains(`${timeLogged}h logged`)
+        .should('exist')
+        .and('be.visible');
+      cy.log(`${timeLogged}h logged visible`);
+    });
+  }
+
+  verifyNoTimeLRemainingInIssueDetailModal() {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains('remaining')
+        .should('not.exist');
+      cy.log('No time remaining and label present');
+    });
+  }
+
+  verifyNoTimeLRemainingInTimeTrackingModal() {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains('remaining')
+        .should('not.exist');
+      cy.log('No time remaining and label present');
+    });
+  }
+
+  verifyTimeRemainingInIssueDetailModal(timeRemaining) {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains(`${timeRemaining}h remaining`)
+        .should('be.visible');
+      cy.log(`${timeRemaining}h remaining label present`);
+    });
+  }
+  verifyTimeRemainingInTimeTrackingModal(timeRemaining) {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .contains(`${timeRemaining}h remaining`)
+        .should('be.visible');
+      cy.log(`${timeRemaining}h remaining label present`);
+    });
+  }
+
+  verifyNoTimeEstimated() {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.estimatedTimeInput).should('be.visible').and('be.empty');
+      cy.get(this.timeLoggedIcon)
+        .should('be.visible')
+        .siblings()
+        .should('not.contain', 'estimated');
+      cy.log('No time estimated and label present');
+    });
+  }
+
+  removeTimeEstimated() {
+    this.getIssueDetailModal().within(() => {
+      cy.get(this.estimatedTimeInput)
+        .should('exist')
+        .click()
+        .clear()
+        .should('be.empty');
+      cy.log('Estimated hours removed from input');
+    });
+  }
+
+  removeTimeLogged() {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeTrackingModalTimeSpentInput.locator)
+        .eq(this.timeTrackingModalTimeSpentInput.index)
+        .should('be.visible')
+        .click()
+        .clear()
+        .should('be.empty');
+      cy.log('Time logged removed');
+    });
+  }
+  removeTimeRemaining() {
+    this.getTimeTrackingModal().within(() => {
+      cy.get(this.timeTrackingModalTimeRemainingInput.locator)
+        .eq(this.timeTrackingModalTimeRemainingInput.index)
+        .should('be.visible')
+        .click()
+        .clear()
+        .should('be.empty');
+      cy.log('Time remaining removed');
+    });
+  }
   addCommentToIssue(comment) {
     this.getIssueDetailModal().within(() => {
       cy.contains('Add a comment...').click();
@@ -152,17 +406,18 @@ class IssueModal {
 
   validateIssueVisibilityState(issueTitle, isVisible = true) {
     cy.reload();
-    cy.get(this.backlogList).should('be.visible');
+    cy.get(this.backlogList).scrollIntoView().should('be.visible');
     if (isVisible) cy.contains(issueTitle).should('be.visible');
     if (!isVisible) cy.contains(issueTitle).should('not.exist');
   }
 
   clickDeleteButton() {
-    cy.get(this.deleteButton).should('be.visible').click();
+    cy.get(this.deleteButton).scrollIntoView().should('be.visible').click();
   }
 
   confirmDeletion() {
     cy.get(this.confirmationPopup)
+      .scrollIntoView()
       .should('be.visible')
       .within(() => {
         cy.contains(this.deleteButtonName).should('be.visible').click();
@@ -173,6 +428,7 @@ class IssueModal {
 
   confirmCommentDeletion() {
     cy.get(this.confirmationPopup)
+      .scrollIntoView()
       .should('be.visible')
       .within(() => {
         cy.contains(this.deleteCommentButtonName).should('be.visible').click();
@@ -182,9 +438,13 @@ class IssueModal {
 
   cancelDeletion() {
     cy.get(this.confirmationPopup)
+      .scrollIntoView()
       .should('be.visible')
       .within(() => {
-        cy.contains(this.cancelDeletionButtonName).should('be.visible').click();
+        cy.contains(this.cancelDeletionButtonName)
+          .scrollIntoView()
+          .should('be.visible')
+          .click();
       });
     cy.get(this.confirmationPopup).should('not.exist');
     this.getIssueDetailModal().should('be.visible');
@@ -194,6 +454,7 @@ class IssueModal {
     this.getIssueDetailModal().within(() => {
       cy.get(this.closeDetailModalButton.locator)
         .eq(this.closeDetailModalButton.index)
+        .scrollIntoView()
         .should('be.visible')
         .click();
     });
