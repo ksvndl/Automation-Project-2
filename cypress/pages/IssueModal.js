@@ -47,9 +47,10 @@ class IssueModal {
 
   // getEstimatedTimeValue() {
   //   cy.get(this.estimatedTimeInput)
-  //     .invoke('attr', 'value')
+  //     .invoke('val')
   //     .then((value) => {
-  //       return value;
+  // const existingValue = value
+  //       return existingValue;
   //     });
   // }
 
